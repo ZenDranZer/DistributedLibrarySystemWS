@@ -1,4 +1,4 @@
-package com.dsd;
+package com.dsd.library;
 
 import java.util.Scanner;
 

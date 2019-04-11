@@ -1,4 +1,4 @@
-package com.dsd;
+package com.dsd.library;
 
 public class ServerConstants {
   static final String SUCCESS = ":success";

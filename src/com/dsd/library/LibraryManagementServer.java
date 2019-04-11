@@ -1,4 +1,4 @@
-package com.dsd;
+package com.dsd.library;
 
 import javax.jws.WebService;
 import java.io.*;
@@ -35,7 +35,7 @@ enum ServerDetails{
     }
 }
 
-@WebService(endpointInterface = "com.dsd.LibraryManagementSystem")
+@WebService(endpointInterface = "com.dsd.library.LibraryManagementSystem", targetNamespace = "http://com.dsd/library/")
 public class LibraryManagementServer implements LibraryManagementSystem {
 
     protected final HashMap<String, User> user;
@@ -61,11 +61,11 @@ public class LibraryManagementServer implements LibraryManagementSystem {
         next_User_ID = 1003;
         next_Manager_ID = 1002;
         lock = new Object();
-        init();
     }
 
     public void setLibrary(String library) {
         this.library = library;
+        init();
     }
 
     public void setLogger(){
@@ -381,6 +381,7 @@ public class LibraryManagementServer implements LibraryManagementSystem {
         else if(clientID.charAt(3) == 'U'){
             String message;
             if(!user.containsKey(clientID)){
+                System.out.println(user);
                 writeToLogFile("Client Validate:Unsuccessful:Invalid UserID " + clientID);
                 return "false" + ServerConstants.FAILURE;
             }else{

@@ -1,4 +1,4 @@
-package com.dsd;
+package com.dsd.library;
 
 /*
  * Library CON port = 1301

@@ -1,4 +1,4 @@
-package com.dsd;
+package com.dsd.library;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
@@ -28,19 +28,19 @@ public class Client implements Runnable {
         try{
         switch (library){
             case "CON":
-                compURL = new URL("http://localhost:8080/com/concordia?wsdl");
+                compURL = new URL("http://localhost:8081/library");
                 break;
             case "MCG":
-                compURL = new URL("http://localhost:8080/com/mcgill?wsdl");
+                compURL = new URL("http://localhost:8082/library");
                 break;
             case "MON":
-                compURL = new URL("http://localhost:8080/com/montreal?wsdl");
+                compURL = new URL("http://localhost:8083/library");
                 break;
         }
         }catch (MalformedURLException e){
             e.printStackTrace();
         }
-        QName comName = new QName("http://com.dsd/","LibraryManagementSystem");
+        QName comName = new QName("http://com.dsd/library/","LibraryManagementServerService");
         Service compService = Service.create(compURL, comName);
         this.client = compService.getPort(LibraryManagementSystem.class);
         sc = new BufferedReader(new InputStreamReader(System.in));
@@ -85,6 +85,7 @@ public class Client implements Runnable {
         char op = 'Y';
         try {
             String response = client.validateUser(clientID);
+            System.out.println(response);
             if(response.contains("false")) {
                 System.out.println("Provided ID is wrong!! please invoke the client again.");
                 writeToLogFile("User id: " + clientID + " Provided ID is wrong!! please invoke the client again.");
