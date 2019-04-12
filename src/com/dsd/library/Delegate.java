@@ -89,12 +89,13 @@ class RequestHandler implements Runnable {
         String data = new String(receiver.getData()).trim();
         String[] request = data.split(":");
         String reply = "";
-        String userID,itemID,itemName;
-        int numberOfDays;
+        String userID = "",itemID = "",itemName = "";
+        int numberOfDays = -1;
         switch (request[1]){
             case "borrowFromOther" :
                 if(request.length != 5){
                     reply = "Unsuccessful"+ServerConstants.FAILURE;
+                    writeToLogFile("Borrow item : " + reply);
                     break;
                 }
                 userID = request[2];
@@ -102,12 +103,14 @@ class RequestHandler implements Runnable {
                 numberOfDays = Integer.parseInt(request[4]);
                 if(!myServer.item.containsKey(itemID)){
                     reply = "Unsuccessful"+ServerConstants.FAILURE;
+                    writeToLogFile("Borrow item : " + reply);
                     break;
                 }
                 Item requestedItem;
                 synchronized (lock) {requestedItem = myServer.item.get(itemID);}
                 if(requestedItem.getItemCount() == 0){
                     reply = "waitlist"+ServerConstants.SUCCESS;
+                    writeToLogFile("Borrow item : " + reply);
                     break;
                 }
                 User currentUser = new User(userID);
@@ -117,6 +120,7 @@ class RequestHandler implements Runnable {
                 if (myServer.borrow.containsKey(currentUser)) {
                     if (myServer.borrow.get(currentUser).containsKey(requestedItem)) {
                         reply = "Unsuccessful"+ServerConstants.FAILURE;
+                        writeToLogFile("Borrow item : " + reply);
                         break;
                     } else {
                         synchronized (lock) {entry = myServer.borrow.get(currentUser);
@@ -130,11 +134,13 @@ class RequestHandler implements Runnable {
                     myServer.borrow.put(currentUser, entry);
                 }
                 reply = "Successful" + ServerConstants.SUCCESS;
+                writeToLogFile("Borrow item : " + reply);
                 break;
 
             case "findAtOther" :
                 if(request.length != 3){
                     reply = "Unsuccessful"+ServerConstants.FAILURE;
+                    writeToLogFile("Find item : " + reply);
                     break;
                 }
                 itemName = request[2];
@@ -148,11 +154,13 @@ class RequestHandler implements Runnable {
                         reply = items.toString();
                     }
                 }
+                writeToLogFile("Find item : " + reply);
                 break;
 
             case "returnToOther" :
                 if(request.length != 4){
                     reply = "Unsuccessful"+ServerConstants.FAILURE;
+                    writeToLogFile("Return item : " + reply);
                     break;
                 }
                 userID = request[2];
@@ -164,11 +172,13 @@ class RequestHandler implements Runnable {
                     value = myServer.borrow.get(currentUser).entrySet().iterator();
                     }else{
                         reply = "Unsuccessful"+ServerConstants.FAILURE;
+                        writeToLogFile("Return item : " + reply);
                         break;
                     }
                 }
                 if(!value.hasNext()){
                     reply = "Unsuccessful"+ServerConstants.FAILURE;
+                    writeToLogFile("Return item : " + reply);
                     break;
                 }
                 boolean status = false;
@@ -190,11 +200,13 @@ class RequestHandler implements Runnable {
                 }else{
                     reply = "Unsuccessful"+ServerConstants.FAILURE;
                 }
+                writeToLogFile("Return item : " + reply);
                 break;
 
             case "isAvailable":
                 if(request.length != 3){
                     reply = "Unsuccessful";
+                    writeToLogFile("Is item available: " + reply);
                     break;
                 }
                 itemID = request[2];
@@ -206,10 +218,12 @@ class RequestHandler implements Runnable {
                         reply = "false";
                 }else
                     reply = "false";
+                writeToLogFile("Is item available: " + reply);
                 break;
             case "addToWaitlist":
                 if(request.length != 5){
                     reply = "Unsuccessful"+ServerConstants.FAILURE;
+                    writeToLogFile("Add to waitList : " + reply);
                     break;
                 }
                 userID = request[2];
@@ -220,19 +234,23 @@ class RequestHandler implements Runnable {
                     if(!myServer.waitingQueue.get(itemID).containsKey(userID)){
                         myServer.waitingQueue.get(itemID).put(userID, numberOfDays);
                         reply = "Successful"+ServerConstants.SUCCESS;
+                        writeToLogFile("Add to waitList : " + reply);
                     }else{
                         reply = "Unsuccessful"+ServerConstants.FAILURE;
+                        writeToLogFile("Add to waitList : " + reply);
                     }
                 } else {
                     HashMap<String, Integer> userList = new HashMap<>();
                     userList.put(userID, numberOfDays);
                     myServer.waitingQueue.put(itemID, userList);
                     reply = "Successful"+ServerConstants.SUCCESS;
+                    writeToLogFile("Add to waitList : " + reply);
                 }
                 break;
             case "addUserToBorrow":
                 if(request.length != 5){
                     reply = "Unsuccessful"+ServerConstants.FAILURE;
+                    writeToLogFile("Add to borrow list : " + reply);
                     break;
                 }
                 userID = request[2];
@@ -268,11 +286,13 @@ class RequestHandler implements Runnable {
                         currentUser.getOutsourced()[2] = true;
                         break;
                 }
+                reply = "Sucessful" + ServerConstants.SUCCESS;
+                writeToLogFile("Add to borrow list : " + reply);
                 break;
             default:
                 reply = "Unsuccessful";
         }
-        writeToLogFile(request[1] + " " + reply);
+        writeToLogFile(itemID + " : " + userID + " : " + numberOfDays + " : " + itemName);
         DatagramPacket sender = new DatagramPacket(reply.getBytes(), reply.length(), receiver.getAddress(), receiver.getPort());
         try {
             mySocket.send(sender); // send the response DatagramPacket object to the requester.

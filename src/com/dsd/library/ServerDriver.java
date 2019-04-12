@@ -5,8 +5,8 @@ import javax.xml.ws.Endpoint;
 public class ServerDriver {
     public static void main(String[] args) {
         String concordiaURL = "http://localhost:8081/library";
-        String mcGillURL = "http://localhost:8082/library/mcgill";
-        String montrealURL = "http://localhost:8083/library/montreal";
+        String mcGillURL = "http://localhost:8082/library";
+        String montrealURL = "http://localhost:8083/library";
 
         LibraryManagementServer concordia = new LibraryManagementServer();
         concordia.setLibrary("CON");

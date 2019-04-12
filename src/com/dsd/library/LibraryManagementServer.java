@@ -120,7 +120,7 @@ public class LibraryManagementServer implements LibraryManagementSystem {
         }
         reply += findAtOtherLibrary(itemName);
         reply += ServerConstants.SUCCESS;
-        writeToLogFile(reply);
+        writeToLogFile("Find Item : " + itemName +" : "+userID + " : " + reply);
         return reply;
     }
 
@@ -131,7 +131,7 @@ public class LibraryManagementServer implements LibraryManagementSystem {
         ArrayList<Item> itemList = new ArrayList<>(item.values());
         reply = itemList.toString();
         reply += ServerConstants.SUCCESS;
-        writeToLogFile(reply);
+        writeToLogFile("List Item : " + managerID + " : " + reply);
         return reply;
     }
 
@@ -155,7 +155,7 @@ public class LibraryManagementServer implements LibraryManagementSystem {
             synchronized (lock){ value = set.entrySet().iterator(); }
             if(!value.hasNext()){
                 message ="You have not borrowed item."+ServerConstants.FAILURE;
-                writeToLogFile(message);
+                writeToLogFile("Return Item : " + itemID +" : "+userID + " : " + message);
                 return message;
             }
             while(value.hasNext()) {
@@ -167,13 +167,13 @@ public class LibraryManagementServer implements LibraryManagementSystem {
                     increamentItemCount(itemID);
                     automaticAssignmentOfBooks(itemID);
                     message = " Successful" + ServerConstants.SUCCESS;
-                    writeToLogFile(message);
+                    writeToLogFile("Return Item : " + itemID +" : "+userID + " : " + message);
                     return message;
                 }
             }
         }
         message = "Item have never been borrowed"+ServerConstants.FAILURE;
-        writeToLogFile(message);
+        writeToLogFile("Return Item : " + itemID +" : "+userID + " : " + message);
         return message;
     }
 
@@ -185,7 +185,7 @@ public class LibraryManagementServer implements LibraryManagementSystem {
             reply = borrowFromOtherLibrary(userID,itemID,numberOfDays);
             if(reply.contains("failure"))
                 reply = "Item not found";
-            writeToLogFile(reply);
+            writeToLogFile("Borrow Item : " + itemID +" : "+userID+" : " +numberOfDays + " : " + reply);
             return reply;
         }
 
@@ -198,7 +198,7 @@ public class LibraryManagementServer implements LibraryManagementSystem {
             if (borrow.containsKey(currentUser)) {
                 if (borrow.get(currentUser).containsKey(requestedItem)) {
                     reply = "User have already borrowed." + ServerConstants.FAILURE;
-                    writeToLogFile(reply);
+                    writeToLogFile("Borrow Item : " + itemID +" : "+userID+" : " +numberOfDays + " : " + reply);
                     return reply;
                 } else {
                     entry = borrow.get(currentUser);
@@ -213,7 +213,7 @@ public class LibraryManagementServer implements LibraryManagementSystem {
             }
             decrementItemCount(itemID);
             reply = "Successful" + ServerConstants.SUCCESS;
-            writeToLogFile(reply);
+            writeToLogFile("Borrow Item : " + itemID +" : "+userID+" : " +numberOfDays + " : " + reply);
             return reply;
         }
     }
@@ -249,11 +249,11 @@ public class LibraryManagementServer implements LibraryManagementSystem {
                     automaticAssignmentOfBooks(itemID);
                 }
             }
-            writeToLogFile(message);
+            writeToLogFile("Add Item : " + itemID +" : "+managerID+" : " +quantity + " : " + message);
             return message;
         }
         message =  "Unsuccessful" + ServerConstants.FAILURE;
-        writeToLogFile(message);
+        writeToLogFile("Add Item : " + itemID +" : "+managerID+" : " +quantity + " : " + message);
         return message;
     }
 
@@ -264,7 +264,7 @@ public class LibraryManagementServer implements LibraryManagementSystem {
 
         if(!item.containsKey(itemID)){
             message = "The item do not exist in inventory." + ServerConstants.FAILURE;
-            writeToLogFile(message);
+            writeToLogFile("Return Item : " + itemID +" : "+managerID+" : " +quantity + " : " + message);
             return message;
         }
         Item currentItem = item.get(itemID);
@@ -278,11 +278,11 @@ public class LibraryManagementServer implements LibraryManagementSystem {
                 }
             }
             message = "Successful" + ServerConstants.SUCCESS;
-            writeToLogFile(message);
+            writeToLogFile("Return Item : " + itemID +" : "+managerID+" : " +quantity + " : " + message);
             return message;
         }else if(currentItem.getItemCount() < quantity){
             message = "incorrectqunatity" + ServerConstants.FAILURE;
-            writeToLogFile(message);
+            writeToLogFile("Return Item : " + itemID +" : "+managerID+" : " +quantity + " : " + message);
             return message;
         }else if(currentItem.getItemCount() > quantity){
             currentItem.setItemCount(currentItem.getItemCount() - quantity);
@@ -291,12 +291,12 @@ public class LibraryManagementServer implements LibraryManagementSystem {
                 item.put(itemID,currentItem);
             }
             message  = "Successful " + ServerConstants.SUCCESS;
-            writeToLogFile(message);
+            writeToLogFile("Return Item : " + itemID +" : "+managerID+" : " +quantity + " : " + message);
             return message;
         }else{
             synchronized (lock){item.remove(itemID);}
             message = "Successful" + ServerConstants.SUCCESS;
-            writeToLogFile(message);
+            writeToLogFile("Return Item : " + itemID +" : "+managerID+" : " +quantity + " : " + message);
             return message;
         }
     }
@@ -324,7 +324,7 @@ public class LibraryManagementServer implements LibraryManagementSystem {
             }
         }else{
             String message = addToForeignWaitlist(userID,itemID,numberOfDays);
-            writeToLogFile(message);
+            writeToLogFile("Add to Library waitlist : " + itemID + " : " + userID + " : " + message);
             return message;
         }
     }
@@ -351,7 +351,7 @@ public class LibraryManagementServer implements LibraryManagementSystem {
             DatagramPacket receivedReply = new DatagramPacket(receive,receive.length);
             mySocket.receive(receivedReply);
             reply = new String(receivedReply.getData()).trim();
-            writeToLogFile(reply);
+            writeToLogFile("Add to foreign Library waitlist : " + itemID + " : " + userID + " : " + reply);
             return reply;
         }catch (SocketException e){
             writeToLogFile("Socket Exception");
@@ -381,8 +381,7 @@ public class LibraryManagementServer implements LibraryManagementSystem {
         else if(clientID.charAt(3) == 'U'){
             String message;
             if(!user.containsKey(clientID)){
-                System.out.println(user);
-                writeToLogFile("Client Validate:Unsuccessful:Invalid UserID " + clientID);
+                writeToLogFile("Client Validate : Unsuccessful : Invalid UserID : " + clientID);
                 return "false" + ServerConstants.FAILURE;
             }else{
                 writeToLogFile("Validate clientID request : clientID : "+ clientID +" Status : Successful");
@@ -402,6 +401,7 @@ public class LibraryManagementServer implements LibraryManagementSystem {
         writeToLogFile("Validate clientID request : clientID : "+ clientID + " Status : Unsuccessful");
         return "false" + ServerConstants.FAILURE;
     }
+
 
     /**used by the user to exchange an item with another, first we return the item,
      * if successful, we attempt to borrow new item, if both operations are successful,
@@ -528,7 +528,7 @@ public class LibraryManagementServer implements LibraryManagementSystem {
             System.out.println("IO Exception.");
             e.printStackTrace();
         }
-        writeToLogFile(reply);
+        writeToLogFile("Borrow from other library : "+ itemID + " : "+ userID + " : " +numberOfDays+ " : "+reply);
         return reply;
     }
 
@@ -578,7 +578,7 @@ public class LibraryManagementServer implements LibraryManagementSystem {
             System.out.println("IO Exception.");
             e.printStackTrace();
         }
-        writeToLogFile(reply);
+        writeToLogFile("Find at another library : " + itemName + " : " +reply);
         return reply;
     }
 
@@ -633,7 +633,7 @@ public class LibraryManagementServer implements LibraryManagementSystem {
             System.out.println("IO Exception.");
             e.printStackTrace();
         }
-        writeToLogFile(reply);
+        writeToLogFile("Return to another Library : " + itemID + " : " + userID + " : "+reply);
         return reply;
     }
 
@@ -719,10 +719,9 @@ public class LibraryManagementServer implements LibraryManagementSystem {
             if(iterator.hasNext()){
                 Map.Entry<String, Integer> pair = iterator.next();
                 String message = borrowItem(pair.getKey(),itemID,pair.getValue());
-                System.out.println(message);
                 if(message.substring(message.length()-10).contains(ServerConstants.SUCCESS)) {
                     waitingQueue.get(itemID).remove(pair.getKey());
-                    writeToLogFile(message);
+                    writeToLogFile("Auto Assignment : " +itemID+" : "+pair.getKey()+" : "+message);
                     if (!user.containsKey(pair.getKey())) {
                         addForgineUserInBorrow(pair.getKey(),itemID,pair.getValue());
                     }
@@ -746,7 +745,6 @@ public class LibraryManagementServer implements LibraryManagementSystem {
             if (userID.substring(0,3).equals("MON")){
                 port1 = 1303;
             }
-            System.out.println("---------------------------------in addFUB." + port1);
             String request = library+":addUserToBorrow:"+userID+":"+itemID+":"+numberOfDays;
             DatagramPacket sendRequest = new DatagramPacket(request.getBytes(),request.length(),host,port1);
             mySocket.send(sendRequest);
@@ -767,6 +765,6 @@ public class LibraryManagementServer implements LibraryManagementSystem {
             System.out.println("IO Exception.");
             e.printStackTrace();
         }
-        writeToLogFile(reply);
+        writeToLogFile("Auto assignment foreign : " + itemID + " : " + userID + " : " +reply);
     }
 }

@@ -70,6 +70,7 @@ public class Client implements Runnable {
         System.out.println("1) Add an item.");
         System.out.println("2) Remove an Item.");
         System.out.println("3) List Item Availability.");
+        System.out.println("4) MultiThreading (Operations : Add Item & List Item)");
         System.out.println("Press 'N' or 'n' to exit.");
     }
 
@@ -140,7 +141,7 @@ public class Client implements Runnable {
                         String newItemID = sc.readLine();
                         System.out.println("Enter old Item ID :");
                         String oldItemID = sc.readLine();
-                        reply = client.exchangeItem(clientID,newItemID,oldItemID);
+                        reply = client.exchangeItem(clientID,oldItemID,newItemID);
                         writeToLogFile(reply);
                         System.out.println("Reply from server : " + reply);
                         op = 'Y';
@@ -211,6 +212,10 @@ public class Client implements Runnable {
                         System.out.println("Reply from Server : \n" + reply);
                         op = 'Y';
                         break;
+                    case '4':
+                        performMultiThreading();
+                        op = 'Y';
+                        break;
                     case 'N':
                         writeToLogFile("Manager Quit : UserID : " + clientID);
                         break;
@@ -231,6 +236,62 @@ public class Client implements Runnable {
             e.printStackTrace();
         }
     }
+
+    private void performMultiThreading(){
+        Runnable runnable1 = new Runnable() {
+            @Override
+            public void run() {
+                String reply = client.addItem(clientID,"CON0004","ABC",3);
+                writeToLogFile(reply);
+                System.out.println("Multithread : 1 :Reply from Server : " + reply);
+                reply = client.listItem(clientID);
+                writeToLogFile(reply);
+                System.out.println("Multithread : 1 :Reply from Server : " + reply);
+            }
+        };
+        Runnable runnable2 = new Runnable() {
+            @Override
+            public void run() {
+                String reply = client.addItem(clientID,"CON0005","ABCD",3);
+                writeToLogFile(reply);
+                System.out.println("Multithread : 2 :Reply from Server : " + reply);
+                reply = client.listItem(clientID);
+                writeToLogFile(reply);
+                System.out.println("Multithread : 2 :Reply from Server : " + reply);
+            }
+        };
+        Runnable runnable3 = new Runnable() {
+            @Override
+            public void run() {
+                String reply = client.addItem(clientID,"CON0006","ABCDE",3);
+                writeToLogFile(reply);
+                System.out.println("Multithread : 3 :Reply from Server : " + reply);
+                reply = client.listItem(clientID);
+                writeToLogFile(reply);
+                System.out.println("Multithread : 3 :Reply from Server : " + reply);
+            }
+        };
+        Runnable runnable4 = new Runnable() {
+            @Override
+            public void run() {
+                String reply = client.addItem(clientID,"CON0007","ABCDEF",3);
+                writeToLogFile(reply);
+                System.out.println("Multithread : 4 :Reply from Server : " + reply);
+                reply = client.listItem(clientID);
+                writeToLogFile(reply);
+                System.out.println("Multithread : 4 :Reply from Server : " + reply);
+            }
+        };
+        Thread thread1 = new Thread(runnable1);
+        Thread thread2 = new Thread(runnable2);
+        Thread thread3 = new Thread(runnable3);
+        Thread thread4 = new Thread(runnable4);
+        thread1.start();
+        thread2.start();
+        thread3.start();
+        thread4.start();
+    }
+
 
     synchronized private void writeToLogFile(String message) {
         try {
